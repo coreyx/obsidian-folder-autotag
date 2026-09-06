@@ -5,6 +5,21 @@
  */
 import { mock } from 'bun:test'
 
+// Faithful enough stand-in for the real MetadataCache helper: frontmatter
+// tags come back '#'-prefixed, matching real Obsidian. Declared outside the
+// mocked module object so `getAllTags` below can reuse it directly.
+const parseFrontMatterTags = (frontmatter: Record<string, unknown> | null): string[] | null => {
+    const raw = frontmatter?.['tags']
+    if (raw === null || raw === undefined) {
+        return null
+    }
+    const list = Array.isArray(raw) ? raw : [raw]
+    const tags = list
+        .filter((tag): tag is string => typeof tag === 'string')
+        .map((tag) => (tag.startsWith('#') ? tag : `#${tag}`))
+    return tags.length > 0 ? tags : null
+}
+
 // Mock the obsidian module (fire-and-forget, no need to await)
 void mock.module('obsidian', () => ({
     Notice: class Notice {
@@ -83,5 +98,16 @@ void mock.module('obsidian', () => ({
         arrayBuffer: new ArrayBuffer(0)
     }),
     debounce: (fn: (...args: unknown[]) => unknown) => fn,
-    setIcon: () => {}
+    setIcon: () => {},
+    parseFrontMatterTags,
+    // getAllTags combines frontmatter and inline tags, matching real Obsidian.
+    getAllTags: (cache: {
+        tags?: { tag: string }[]
+        frontmatter?: Record<string, unknown>
+    }): string[] | null => {
+        const inline = (cache.tags ?? []).map((t) => t.tag)
+        const frontmatterTags = parseFrontMatterTags(cache.frontmatter ?? null) ?? []
+        const combined = [...frontmatterTags, ...inline]
+        return combined.length > 0 ? combined : null
+    }
 }))

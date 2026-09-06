@@ -1,8 +1,6 @@
 import { Notice, PluginSettingTab } from 'obsidian'
 import type { App, SettingDefinitionItem } from 'obsidian'
-import type TemplatePlugin from '../../main'
-import { BUY_ME_A_COFFEE_BADGE_DATA_URL } from '../assets/buy-me-a-coffee'
-import { BUY_ME_A_COFFEE_URL, renderSupportSection } from '../ui/support-links'
+import type FolderAutotagPlugin from '../../main'
 
 /**
  * Settings tab, declared rather than rendered (Obsidian 1.13+).
@@ -27,11 +25,10 @@ import { BUY_ME_A_COFFEE_URL, renderSupportSection } from '../ui/support-links'
  * - `setControlValue` MUST reject on failure. Resolving tells the framework
  *   the write landed, so the pane keeps showing a value that was never stored.
  */
-// TODO: Rename this class to match your plugin name (e.g., MyAwesomePluginSettingTab)
-export class TemplatePluginSettingTab extends PluginSettingTab {
-    plugin: TemplatePlugin
+export class FolderAutotagPluginSettingTab extends PluginSettingTab {
+    plugin: FolderAutotagPlugin
 
-    constructor(app: App, plugin: TemplatePlugin) {
+    constructor(app: App, plugin: FolderAutotagPlugin) {
         super(app, plugin)
         this.plugin = plugin
     }
@@ -44,50 +41,6 @@ export class TemplatePluginSettingTab extends PluginSettingTab {
                 name: 'Enabled',
                 desc: 'Turn the plugin features on or off.',
                 control: { type: 'toggle', key: 'enabled' }
-            },
-            // TODO: Adapt this or remove
-            {
-                name: 'Follow me on X',
-                desc: 'Sébastien Dubois (@dSebastien)',
-                searchable: false,
-                // A CTA button, not a row `action:`. `action:` makes the WHOLE
-                // row clickable and draws no button at all, so a link row that
-                // used to have one silently loses it in the port.
-                render: (setting): void => {
-                    setting.addButton((button) => {
-                        button
-                            .setCta()
-                            .setButtonText('Follow me on X')
-                            .onClick(() => {
-                                window.open('https://x.com/dSebastien')
-                            })
-                    })
-                }
-            },
-            // TODO: Adapt this or remove
-            {
-                type: 'group',
-                // No heading: renderSupportSection draws its own.
-                items: [
-                    {
-                        name: 'Support',
-                        // Not a setting — keep it out of the settings search.
-                        searchable: false,
-                        render: (setting): void => {
-                            // Render INSIDE the row (settingEl), never into
-                            // group.listEl — see the class docs above.
-                            setting.infoEl.remove() // the section draws its own headings
-                            // `.setting-item` is a flex ROW. The support block
-                            // is a stack of full-width rows, so without this it
-                            // would lay its heading, buttons and badge out side
-                            // by side.
-                            setting.settingEl.addClass('settings-stack')
-                            renderSupportSection(setting.settingEl, (el) => {
-                                this.renderBuyMeACoffeeBadge(el)
-                            })
-                        }
-                    }
-                ]
             }
         ]
     }
@@ -123,16 +76,5 @@ export class TemplatePluginSettingTab extends PluginSettingTab {
                 new Notice('Failed to save settings.')
                 throw new Error(`Setting "${key}" does not address a known field.`)
         }
-    }
-
-    // TODO: Adapt this or remove
-    renderBuyMeACoffeeBadge(contentEl: HTMLElement | DocumentFragment, width = 175) {
-        const linkEl = contentEl.createEl('a', {
-            href: BUY_ME_A_COFFEE_URL
-        })
-        const imgEl = linkEl.createEl('img')
-        imgEl.src = BUY_ME_A_COFFEE_BADGE_DATA_URL
-        imgEl.alt = 'Buy me a coffee'
-        imgEl.width = width
     }
 }

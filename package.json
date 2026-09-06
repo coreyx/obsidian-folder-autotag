@@ -1,11 +1,10 @@
 {
-    "name": "obsidian-my-plugin",
-    "version": "3.0.0",
-    "description": "TODO: describe what your plugin does (must end with a period, must not contain the word \"Obsidian\", must not start with the plugin name).",
+    "name": "obsidian-folder-autotag",
+    "version": "0.1.0",
+    "description": "Automatically tag notes added to folders in Obsidian",
     "author": {
-        "name": "Your Name",
-        "email": "your-email@example.com",
-        "url": "https://your-website.com"
+        "name": "Corey Struzan",
+        "email": "name@example.com"
     },
     "keywords": [
         "obsidian",
@@ -15,12 +14,12 @@
     "private": true,
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/your-username/obsidian-my-plugin.git"
+        "url": "git+https://github.com/coreyx/obsidian-folder-autotag.git"
     },
     "bugs": {
-        "url": "https://github.com/your-username/obsidian-my-plugin/issues"
+        "url": "https://github.com/coreyx/obsidian-folder-autotag/issues"
     },
-    "homepage": "https://github.com/your-username/obsidian-my-plugin",
+    "homepage": "https://github.com/coreyx/obsidian-folder-autotag",
     "engines": {
         "node": ">=20.0.0",
         "npm": ">=10.1.0"
@@ -89,7 +88,7 @@
         "@conventional-changelog/git-client": "2.7.0",
         "handlebars": "4.7.9",
         "lodash": "4.18.1",
-        "fast-uri": "3.1.5",
+        "fast-uri": "3.1.6",
         "flatted": "3.4.2",
         "yaml": "2.9.0",
         "js-yaml": "4.3.1",

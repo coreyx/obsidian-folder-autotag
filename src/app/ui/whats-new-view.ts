@@ -5,7 +5,8 @@ import {
     BUY_ME_A_COFFEE_URL,
     GITHUB_SPONSORS_URL,
     KNOWII_COMMUNITY_URL,
-    YOUTUBE_CHANNEL_URL
+    YOUTUBE_CHANNEL_URL,
+    hasSupportLink
 } from './support-links'
 import {
     WHATS_NEW_MARKER_CLASS,
@@ -25,8 +26,8 @@ export interface WhatsNewEntry {
 
 /**
  * Build the view creator for a plugin's "What's new" tab: the tab shown once
- * after an update, with that plugin's release notes, the Knowii community, and
- * ways to support development.
+ * after an update, with that plugin's release notes and ways to support
+ * development.
  *
  * One tab per plugin: the view type is namespaced with the plugin id, so
  * plugins updated in the same session (e.g. "Update all") each open their own
@@ -93,38 +94,52 @@ export function createWhatsNewViewCreator(
 
             const linksEl = bodyEl.createDiv({ cls: `${prefix}-whats-new-links` })
 
-            new Setting(linksEl)
-                .setName('Join the Knowii community')
-                .setDesc(
-                    'Learn to organize your notes and put your knowledge to work, together with fellow knowledge workers.'
-                )
-                .addButton((button) => {
-                    button
-                        .setCta()
-                        .setButtonText('Join Knowii')
-                        .onClick(() => {
-                            window.open(KNOWII_COMMUNITY_URL)
-                        })
-                })
+            if (hasSupportLink(KNOWII_COMMUNITY_URL)) {
+                new Setting(linksEl)
+                    .setName('Join the Knowii community')
+                    .setDesc(
+                        'Learn to organize your notes and put your knowledge to work, together with fellow knowledge workers.'
+                    )
+                    .addButton((button) => {
+                        button
+                            .setCta()
+                            .setButtonText('Join Knowii')
+                            .onClick(() => {
+                                window.open(KNOWII_COMMUNITY_URL)
+                            })
+                    })
+            }
 
-            new Setting(linksEl)
-                .setName('Support this plugin')
-                .setDesc('Your support keeps development and maintenance going ❤️')
-                .addButton((button) => {
-                    button.setButtonText('GitHub Sponsors').onClick(() => {
-                        window.open(GITHUB_SPONSORS_URL)
+            if (
+                hasSupportLink(GITHUB_SPONSORS_URL) ||
+                hasSupportLink(BUY_ME_A_COFFEE_URL) ||
+                hasSupportLink(YOUTUBE_CHANNEL_URL)
+            ) {
+                const supportSetting = new Setting(linksEl)
+                    .setName('Support this plugin')
+                    .setDesc('Your support keeps development and maintenance going ❤️')
+                if (hasSupportLink(GITHUB_SPONSORS_URL)) {
+                    supportSetting.addButton((button) => {
+                        button.setButtonText('GitHub Sponsors').onClick(() => {
+                            window.open(GITHUB_SPONSORS_URL)
+                        })
                     })
-                })
-                .addButton((button) => {
-                    button.setButtonText('Buy me a coffee').onClick(() => {
-                        window.open(BUY_ME_A_COFFEE_URL)
+                }
+                if (hasSupportLink(BUY_ME_A_COFFEE_URL)) {
+                    supportSetting.addButton((button) => {
+                        button.setButtonText('Buy me a coffee').onClick(() => {
+                            window.open(BUY_ME_A_COFFEE_URL)
+                        })
                     })
-                })
-                .addButton((button) => {
-                    button.setButtonText('YouTube').onClick(() => {
-                        window.open(YOUTUBE_CHANNEL_URL)
+                }
+                if (hasSupportLink(YOUTUBE_CHANNEL_URL)) {
+                    supportSetting.addButton((button) => {
+                        button.setButtonText('YouTube').onClick(() => {
+                            window.open(YOUTUBE_CHANNEL_URL)
+                        })
                     })
-                })
+                }
+            }
         }
 
         protected override async onClose(): Promise<void> {

@@ -1,15 +1,12 @@
 {
-    "id": "my-plugin",
-    "name": "My Plugin",
-    "description": "TODO: describe what your plugin does (must end with a period, must not contain the word \"Obsidian\", must not start with the plugin name).",
-    "version": "3.0.0",
+    "id": "obsidian-folder-autotag",
+    "name": "Folder Autotag",
+    "description": "Automatically tag notes added to folders in Obsidian",
+    "version": "0.1.0",
     "minAppVersion": "1.13.0",
     "isDesktopOnly": false,
-    "author": "Sébastien Dubois",
-    "authorUrl": "https://dsebastien.net",
+    "author": "Corey Struzan",
     "fundingUrl": {
-        "Join Knowii": "https://www.store.dsebastien.net/product/knowii-community/",
-        "GitHub Sponsors": "https://github.com/sponsors/dsebastien",
-        "Buy Me a Coffee": "https://www.buymeacoffee.com/dsebastien"
+        "GitHub Sponsors": "https://github.com/sponsors/coreyx"
     }
 }

@@ -1,52 +1,49 @@
-# Obsidian Plugin Template (Bun)
+# Folder Autotag
 
-A modern Obsidian plugin template using **Bun** as the package manager and bundler, with TypeScript, Tailwind CSS v4, ESLint, Prettier, and automated release workflows.
+Automatically tag notes based on the folder they're in. Configure a folder once, and every note
+added to it — created there, moved in, or already sitting there when you save the rule — gets
+tagged for you.
 
 ## Features
 
-- **Bun** for fast package management and bundling
-- **TypeScript** with strict configuration
-- **Tailwind CSS v4** for styling
-- **ESLint + Prettier** for code quality
-- **Husky + lint-staged** for pre-commit hooks
-- **Commitizen + Conventional Commits** for standardized commit messages
-- **GitHub Actions** for CI/CD and automated releases
-- **Immer** for immutable state management
-- **Zod** for runtime validation
+- **Per-folder tag rules** — right-click any folder → **Set Auto-Tag** → enter one or more tags.
+- **Applies automatically** — a note created in (or moved into) a configured folder gets tagged the
+  moment it arrives, no manual tagging required.
+- **Subfolders inherit rules** — a folder's tags apply to every note in its subfolders too, at any
+  depth, combined with a subfolder's own rule if it has one.
+- **Retroactive on save** — saving a folder's rule immediately tags existing notes already in that
+  folder (and its subfolders), not just ones added afterward.
+- **Never destructive** — only adds tags, never removes one, and never duplicates a tag a note
+  already has, whether it's in the frontmatter or an inline `#tag` in the body.
 
-## Getting Started
+## Installation
 
-See [TEMPLATE_USAGE.md](./TEMPLATE_USAGE.md) for detailed instructions on how to use this template to create your own Obsidian plugin.
+This plugin isn't yet available in Obsidian's community plugin catalog.
 
-## Quick Start
+### Manual installation
 
-1. Click "Use this template" on GitHub to create a new repository
-2. Clone your new repository
-3. Follow the setup instructions in [TEMPLATE_USAGE.md](./TEMPLATE_USAGE.md)
-4. Run `bun install` to install dependencies
-5. Run `bun run dev` to start development
+1. Download `main.js`, `manifest.json`, and `styles.css` from the
+   [latest release](https://github.com/coreyx/obsidian-folder-autotag/releases).
+2. Copy them into `<your vault>/.obsidian/plugins/obsidian-folder-autotag/`.
+3. Reload Obsidian and enable **Folder Autotag** under **Settings → Community plugins**.
+
+### Via BRAT (beta testing)
+
+1. Install the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin.
+2. Add this repository as a beta plugin: `coreyx/obsidian-folder-autotag`.
+
+## Quick start
+
+1. Right-click a folder in the file explorer and select **Set Auto-Tag**.
+2. Enter one or more tags (comma- or newline-separated), then select **Save**.
+3. Any note already in that folder or its subfolders is tagged immediately; every note added
+   afterward is tagged automatically.
+
+See the [user guide](./docs/usage.md) for more detail.
 
 ## Development
 
-See [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed development instructions.
-
-### Prerequisites
-
-- [Bun](https://bun.sh/) (latest version)
-- [Git](https://git-scm.com/)
-- An Obsidian vault for testing
-
-### Commands
-
-| Command             | Description                       |
-| ------------------- | --------------------------------- |
-| `bun install`       | Install dependencies              |
-| `bun run dev`       | Development build with watch mode |
-| `bun run build`     | Production build                  |
-| `bun run tsc:watch` | Type check in watch mode          |
-| `bun run lint`      | Run ESLint                        |
-| `bun run format`    | Format with Prettier              |
-| `bun run test`      | Run tests (isolated)              |
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for setup and the full development workflow.
 
 ## Contributing
 
@@ -56,22 +53,15 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
 
 MIT License - see [LICENSE](./LICENSE) for details.
 
-<!-- support-cta -->
-
 ## News & support
 
-To stay up to date about this plugin, Obsidian in general, Personal Knowledge Management and note-taking:
+To stay up to date about this plugin, or what I'm currently up to:
 
-- Subscribe to [my newsletter](https://dsebastien.net/newsletter)
-- Subscribe to [my YouTube channel](https://youtube.com/@dsebastien)
-- Join the [Knowii community](https://www.store.dsebastien.net/product/knowii-community/) and learn to organize your notes and put your knowledge to work, together with fellow knowledge workers
+- Subscribe to [my newsletter](https://coreystruzan.com/newsletter)
+- Subscribe to [my YouTube channel](https://youtube.com/@coreystruzan)
 
 If this plugin is useful to you, here are the best ways to support my work ❤️:
 
-- [Join the Knowii community](https://www.store.dsebastien.net/product/knowii-community/)
-- [Become a GitHub Sponsor](https://github.com/sponsors/dsebastien)
-- [Buy me a coffee](https://www.buymeacoffee.com/dsebastien)
-- [Subscribe to my YouTube channel](https://youtube.com/@dsebastien)
-- [Check out my products](https://store.dsebastien.net)
-
-Found a bug or have an idea? [Open an issue](https://github.com/dsebastien/obsidian-plugin-template/issues).
+- [Become a GitHub Sponsor](https://github.com/sponsors/coreyx)
+- [Buy me a coffee](https://www.buymeacoffee.com/coreystruzan)
+- [Subscribe to my YouTube channel](https://youtube.com/@coreystruzan)

@@ -14,12 +14,12 @@ Thank you for your interest in contributing to this project!
 1. Fork this repository by clicking the "Fork" button on GitHub
 2. Clone your fork locally:
     ```bash
-    git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-    cd YOUR_REPO_NAME
+    git clone https://github.com/YOUR_USERNAME/obsidian-folder-autotag.git
+    cd obsidian-folder-autotag
     ```
 3. Add the upstream repository as a remote:
     ```bash
-    git remote add upstream https://github.com/ORIGINAL_OWNER/YOUR_REPO_NAME.git
+    git remote add upstream https://github.com/coreyx/obsidian-folder-autotag.git
     ```
 
 ### Install Dependencies

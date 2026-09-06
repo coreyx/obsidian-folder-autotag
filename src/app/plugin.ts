@@ -1,20 +1,24 @@
-import { Plugin } from 'obsidian'
+import { Plugin, TFolder } from 'obsidian'
 import { DEFAULT_SETTINGS } from './types/plugin-settings.intf'
 import type { PluginSettings } from './types/plugin-settings.intf'
-import { TemplatePluginSettingTab } from './settings/settings-tab'
+import { FolderAutotagPluginSettingTab } from './settings/settings-tab'
+import { FolderTagRulesService } from './services/folder-tag-rules.service'
+import { registerAutoTagListener } from './commands/register-auto-tag-listener'
+import { registerFolderContextMenu } from './commands/register-folder-context-menu'
 import { log } from '../utils/log'
 import { registerWhatsNewView } from './whats-new'
 import { produce } from 'immer'
 import type { Draft } from 'immer'
 
-// TODO: Rename this class to match your plugin name (e.g., MyAwesomePlugin)
-export class TemplatePlugin extends Plugin {
+export class FolderAutotagPlugin extends Plugin {
     /**
      * The plugin settings are immutable
      */
     // `override` required: `Plugin.settings?: unknown` exists in the 1.13+
     // typings this template now targets (minAppVersion 1.13.0).
     override settings: PluginSettings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
+
+    readonly folderTagRulesService: FolderTagRulesService = new FolderTagRulesService(this)
 
     /**
      * Executed as soon as the plugin loads
@@ -25,10 +29,31 @@ export class TemplatePlugin extends Plugin {
         registerWhatsNewView(this)
         await this.loadSettings()
 
-        // TODO
+        // A folder rename/move keeps its rule at the new path; a folder delete
+        // drops its rule. Pre-existing folders never have a rule yet, so these
+        // are always no-ops for anything but a folder created after the user
+        // configured it — no onLayoutReady gate needed (unlike the vault
+        // "create" listener registered in registerAutoTagListener).
+        this.registerEvent(
+            this.app.vault.on('rename', (file, oldPath) => {
+                if (file instanceof TFolder) {
+                    void this.folderTagRulesService.handleFolderRenamed(oldPath, file.path)
+                }
+            })
+        )
+        this.registerEvent(
+            this.app.vault.on('delete', (file) => {
+                if (file instanceof TFolder) {
+                    void this.folderTagRulesService.handleFolderDeleted(file.path)
+                }
+            })
+        )
+
+        registerAutoTagListener(this)
+        registerFolderContextMenu(this)
 
         // Add a settings screen for the plugin
-        this.addSettingTab(new TemplatePluginSettingTab(this.app, this))
+        this.addSettingTab(new FolderAutotagPluginSettingTab(this.app, this))
     }
 
     override onunload() {}
@@ -56,6 +81,17 @@ export class TemplatePlugin extends Plugin {
                 draft.enabled = loadedSettings.enabled
             } else {
                 log('The loaded settings miss the [enabled] property', 'debug')
+                needToSaveSettings = true
+            }
+
+            if (
+                typeof loadedSettings.folderTagRules === 'object' &&
+                loadedSettings.folderTagRules !== null &&
+                !Array.isArray(loadedSettings.folderTagRules)
+            ) {
+                draft.folderTagRules = loadedSettings.folderTagRules
+            } else {
+                log('The loaded settings miss the [folderTagRules] property', 'debug')
                 needToSaveSettings = true
             }
         })

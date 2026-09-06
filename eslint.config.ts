@@ -92,7 +92,12 @@ export default defineConfig([
                         'Knowii',
                         'GitHub Sponsors',
                         'Sébastien Dubois',
-                        'dSebastien'
+                        'dSebastien',
+                        // This plugin's own feature name, stylized on purpose
+                        // (menu item and modal title both read "Set Auto-Tag") —
+                        // a specific coined term, not a generic UI word like
+                        // 'Settings'.
+                        'Auto-Tag'
                     ]
                 }
             ]

@@ -3,3 +3,10 @@ node_modules
 CHANGELOG.md
 .claude/
 bun.lockb
+
+# Planning/agent-facing docs, not published user-facing content — style
+# consistency here matters less than content, and Prettier's markdown
+# formatter has a known instability on checklist items with nested code
+# fences (see git history on spec/tasks.md).
+spec/
+documentation/
