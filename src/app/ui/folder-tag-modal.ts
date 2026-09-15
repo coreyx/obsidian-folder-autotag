@@ -9,12 +9,14 @@ export class FolderTagModal extends Modal {
     private readonly plugin: FolderAutotagPlugin
     private readonly folder: TFolder
     private value: string
+    private ignoreFolderNotes: boolean
 
     constructor(app: App, plugin: FolderAutotagPlugin, folder: TFolder) {
         super(app)
         this.plugin = plugin
         this.folder = folder
         this.value = (plugin.folderTagRulesService.getRule(folder.path) ?? []).join(', ')
+        this.ignoreFolderNotes = plugin.folderTagRulesService.getIgnoreFolderNotes(folder.path)
     }
 
     override onOpen(): void {
@@ -30,20 +32,36 @@ export class FolderTagModal extends Modal {
             })
 
         new Setting(this.contentEl)
+            .setName('Ignore folder notes')
+            .setDesc(
+                'Do not apply this folder’s automatic tags to a note matching the folder name.'
+            )
+            .addToggle((toggle) => {
+                toggle.setValue(this.ignoreFolderNotes).onChange((value) => {
+                    this.ignoreFolderNotes = value
+                })
+            })
+
+        new Setting(this.contentEl)
             .addButton((button) =>
                 button
                     .setButtonText('Save')
                     .setCta()
                     .onClick(async () => {
                         const tags = parseTagInput(this.value)
-                        await this.plugin.folderTagRulesService.setRule(this.folder.path, tags)
+                        await this.plugin.folderTagRulesService.setRule(
+                            this.folder.path,
+                            tags,
+                            this.ignoreFolderNotes
+                        )
                         // Additive-only: only a saved (non-empty) rule retroactively tags
                         // existing notes. Clearing the rule must not touch any note's tags.
                         if (tags.length > 0) {
                             await applyRuleToExistingNotes(
                                 this.plugin.app,
                                 this.folder,
-                                this.plugin.settings.folderTagRules
+                                this.plugin.settings.folderTagRules,
+                                this.plugin.settings.folderIgnoreFolderNotes
                             )
                         }
                         this.close()

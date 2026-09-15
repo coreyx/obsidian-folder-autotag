@@ -82,6 +82,17 @@ void mock.module('obsidian', () => ({
             return this
         }
     },
+    ToggleComponent: class ToggleComponent {
+        setValue(_val: boolean) {
+            return this
+        }
+        getValue() {
+            return false
+        }
+        onChange(_cb: (val: boolean) => unknown) {
+            return this
+        }
+    },
     Menu: class Menu {
         addItem(_cb: (item: unknown) => unknown) {
             return this

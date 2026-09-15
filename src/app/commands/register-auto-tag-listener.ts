@@ -55,7 +55,13 @@ export function registerAutoTagListener(plugin: FolderAutotagPlugin): void {
             return
         }
         pending.delete(file.path)
-        void applyFolderTags(plugin.app, file, cache, plugin.settings.folderTagRules)
+        void applyFolderTags(
+            plugin.app,
+            file,
+            cache,
+            plugin.settings.folderTagRules,
+            plugin.settings.folderIgnoreFolderNotes
+        )
     }
 
     plugin.app.workspace.onLayoutReady(() => {

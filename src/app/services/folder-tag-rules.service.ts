@@ -21,12 +21,17 @@ export class FolderTagRulesService {
         return this.host.settings.folderTagRules[folderPath]
     }
 
+    /** Whether automatic tagging should ignore notes matching the folder name. */
+    getIgnoreFolderNotes(folderPath: string): boolean {
+        return this.host.settings.folderIgnoreFolderNotes[folderPath] ?? false
+    }
+
     /**
      * Sets a folder's rule. An empty (or entirely blank) tag list removes the
      * rule instead of persisting an empty array — a folder with zero tags
      * configured has no rule.
      */
-    async setRule(folderPath: string, tags: string[]): Promise<void> {
+    async setRule(folderPath: string, tags: string[], ignoreFolderNotes?: boolean): Promise<void> {
         const normalized = normalizeTags(tags)
         if (normalized.length === 0) {
             await this.removeRule(folderPath)
@@ -34,31 +39,43 @@ export class FolderTagRulesService {
         }
         await this.host.updateSettings((draft) => {
             draft.folderTagRules[folderPath] = normalized
+            draft.folderIgnoreFolderNotes[folderPath] = ignoreFolderNotes ?? false
         })
     }
 
     /** No-op if the folder has no rule. */
     async removeRule(folderPath: string): Promise<void> {
-        if (!(folderPath in this.host.settings.folderTagRules)) {
+        if (
+            !(folderPath in this.host.settings.folderTagRules) &&
+            !(folderPath in this.host.settings.folderIgnoreFolderNotes)
+        ) {
             return
         }
         await this.host.updateSettings((draft) => {
             delete draft.folderTagRules[folderPath]
+            delete draft.folderIgnoreFolderNotes[folderPath]
         })
     }
 
     /** Moves a folder's rule to its new path after a rename. No-op if it had none. */
     async handleFolderRenamed(oldPath: string, newPath: string): Promise<void> {
-        if (!(oldPath in this.host.settings.folderTagRules)) {
+        if (
+            !(oldPath in this.host.settings.folderTagRules) &&
+            !(oldPath in this.host.settings.folderIgnoreFolderNotes)
+        ) {
             return
         }
         await this.host.updateSettings((draft) => {
             const rule = draft.folderTagRules[oldPath]
-            if (rule === undefined) {
-                return
+            if (rule !== undefined) {
+                draft.folderTagRules[newPath] = rule
+                delete draft.folderTagRules[oldPath]
             }
-            draft.folderTagRules[newPath] = rule
-            delete draft.folderTagRules[oldPath]
+            const ignore = draft.folderIgnoreFolderNotes[oldPath]
+            if (ignore !== undefined) {
+                draft.folderIgnoreFolderNotes[newPath] = ignore
+                delete draft.folderIgnoreFolderNotes[oldPath]
+            }
         })
     }
 

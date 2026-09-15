@@ -92,6 +92,19 @@ export class FolderAutotagPlugin extends Plugin {
                 draft.folderTagRules = loadedSettings.folderTagRules
             } else {
                 log('The loaded settings miss the [folderTagRules] property', 'debug')
+                draft.folderTagRules = {}
+                needToSaveSettings = true
+            }
+
+            if (
+                typeof loadedSettings.folderIgnoreFolderNotes === 'object' &&
+                loadedSettings.folderIgnoreFolderNotes !== null &&
+                !Array.isArray(loadedSettings.folderIgnoreFolderNotes)
+            ) {
+                draft.folderIgnoreFolderNotes = loadedSettings.folderIgnoreFolderNotes
+            } else {
+                log('The loaded settings miss the [folderIgnoreFolderNotes] property', 'debug')
+                draft.folderIgnoreFolderNotes = {}
                 needToSaveSettings = true
             }
         })

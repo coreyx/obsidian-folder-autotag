@@ -1,6 +1,6 @@
 import type { CachedMetadata, FileManager, MetadataCache } from 'obsidian'
 import { TFile, TFolder, getAllTags, parseFrontMatterTags } from 'obsidian'
-import { normalizeTags } from '../domain/folder-tag-rule'
+import { isFolderNote, normalizeTags } from '../domain/folder-tag-rule'
 
 /**
  * The slice of `App` this needs. A structural interface (rather than the full
@@ -17,15 +17,23 @@ export interface RetagHost extends AutoTagHost {
 }
 
 /**
- * Combines the configured tags for `folder` and every ancestor above it, up to
- * the vault root, root-first — so a subfolder's own tags land after its
- * ancestors' in the written array, though final membership doesn't depend on
- * order. A folder with no rule simply contributes nothing; there's no
- * "nearest wins" shadowing — every configured level along the chain applies.
+ * Combines the configured tags for `file` across its folder and all ancestors up to
+ * the vault root, root-first, omitting any folder rule whose 'ignoreFolderNotes'
+ * setting is enabled if `file` is that folder's direct folder note. A folder with
+ * no rule simply contributes nothing; there's no "nearest wins" shadowing — every
+ * configured level along the chain applies.
  */
-const collectAncestorTags = (folder: TFolder, rules: Record<string, string[]>): string[] => {
+export const collectApplicableTags = (
+    file: TFile,
+    rules: Record<string, string[]>,
+    ignoreFolderNotes: Record<string, boolean> = {}
+): string[] => {
+    if (file.parent === null) {
+        return []
+    }
+
     const chain: TFolder[] = []
-    let current: TFolder | null = folder
+    let current: TFolder | null = file.parent
     while (current !== null) {
         chain.push(current)
         current = current.parent
@@ -34,7 +42,14 @@ const collectAncestorTags = (folder: TFolder, rules: Record<string, string[]>): 
     const combined: string[] = []
     for (const ancestor of chain.reverse()) {
         const rule = rules[ancestor.path]
-        if (rule !== undefined) {
+        if (rule === undefined) {
+            continue
+        }
+
+        const shouldIgnore =
+            (ignoreFolderNotes[ancestor.path] ?? false) && isFolderNote(file, ancestor)
+
+        if (!shouldIgnore) {
             combined.push(...rule)
         }
     }
@@ -46,21 +61,23 @@ const collectAncestorTags = (folder: TFolder, rules: Record<string, string[]>): 
  * folder's tags, all the way up to the vault root (see
  * `spec/design.md`'s "Subfolder inheritance") — skipping any tag the note
  * already has, checked against `cache`, which unifies frontmatter and inline
- * tags (see `spec/design.md`'s "Why not Dataview"). No-ops if neither the
- * folder nor any ancestor has a rule, or if every configured tag is already
- * present.
+ * tags (see `spec/design.md`'s "Why not Dataview"). When a folder has
+ * 'ignoreFolderNotes' enabled, notes matching that folder's name do not receive
+ * tags from that folder's rule. No-ops if neither the folder nor any ancestor
+ * has a rule, or if every configured tag is already present.
  */
 export async function applyFolderTags(
     app: AutoTagHost,
     file: TFile,
     cache: CachedMetadata,
-    rules: Record<string, string[]>
+    rules: Record<string, string[]>,
+    ignoreFolderNotes: Record<string, boolean> = {}
 ): Promise<void> {
     if (file.parent === null) {
         return
     }
 
-    const configured = normalizeTags(collectAncestorTags(file.parent, rules))
+    const configured = normalizeTags(collectApplicableTags(file, rules, ignoreFolderNotes))
     if (configured.length === 0) {
         return
     }
@@ -107,12 +124,13 @@ const collectMarkdownFiles = (folder: TFolder): TFile[] => {
 export async function applyRuleToExistingNotes(
     host: RetagHost,
     folder: TFolder,
-    rules: Record<string, string[]>
+    rules: Record<string, string[]>,
+    ignoreFolderNotes: Record<string, boolean> = {}
 ): Promise<void> {
     for (const file of collectMarkdownFiles(folder)) {
         const cache = host.metadataCache.getFileCache(file)
         if (cache !== null) {
-            await applyFolderTags(host, file, cache, rules)
+            await applyFolderTags(host, file, cache, rules, ignoreFolderNotes)
         }
     }
 }

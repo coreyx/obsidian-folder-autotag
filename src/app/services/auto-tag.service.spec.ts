@@ -13,6 +13,7 @@ const makeFolderChain = (folderPath: string): TFolder => {
     for (let i = 0; i < segments.length; i++) {
         const next = new TFolder()
         next.path = segments.slice(0, i + 1).join('/')
+        next.name = segments[i]!
         next.parent = folder
         folder = next
     }
@@ -25,6 +26,7 @@ const makeFolderChain = (folderPath: string): TFolder => {
 const makeFile = (path: string, folderPath: string | null): TFile => {
     const file = new TFile()
     file.path = path
+    file.basename = path.split('/').pop()?.replace(/\.md$/, '') ?? ''
     if (folderPath !== null) {
         file.parent = makeFolderChain(folderPath)
     }
@@ -191,6 +193,68 @@ describe('applyFolderTags', () => {
 
         expect(frontmatterWrites).toEqual([])
     })
+
+    test('a folder note does not receive tags when ignoreFolderNotes is enabled', async () => {
+        const { host, frontmatterWrites } = makeHost()
+        const file = makeFile('Games/Games.md', 'Games')
+        const cache = makeCache({})
+
+        await applyFolderTags(host, file, cache, { Games: ['game'] }, { Games: true })
+
+        expect(frontmatterWrites).toEqual([])
+    })
+
+    test('a normal note in the same folder receives tags when ignoreFolderNotes is enabled', async () => {
+        const { host, frontmatterWrites } = makeHost()
+        const file = makeFile('Games/diablo.md', 'Games')
+        const cache = makeCache({})
+
+        await applyFolderTags(host, file, cache, { Games: ['game'] }, { Games: true })
+
+        expect(frontmatterWrites).toEqual([{ tags: ['game'] }])
+    })
+
+    test('a folder note receives tags when ignoreFolderNotes is disabled or omitted', async () => {
+        const { host, frontmatterWrites } = makeHost()
+        const file = makeFile('Games/Games.md', 'Games')
+        const cache = makeCache({})
+
+        await applyFolderTags(host, file, cache, { Games: ['game'] }, { Games: false })
+
+        expect(frontmatterWrites).toEqual([{ tags: ['game'] }])
+    })
+
+    test('subfolder note matching subfolder name skips subfolder tags but receives ancestor tags', async () => {
+        const { host, frontmatterWrites } = makeHost()
+        const file = makeFile('Games/RPG/RPG.md', 'Games/RPG')
+        const cache = makeCache({})
+
+        await applyFolderTags(
+            host,
+            file,
+            cache,
+            { 'Games': ['game'], 'Games/RPG': ['rpg'] },
+            { 'Games': true, 'Games/RPG': true }
+        )
+
+        expect(frontmatterWrites).toEqual([{ tags: ['game'] }])
+    })
+
+    test('subfolder note matching ancestor name is not a direct folder note of ancestor and receives ancestor tags', async () => {
+        const { host, frontmatterWrites } = makeHost()
+        const file = makeFile('Games/RPG/Games.md', 'Games/RPG')
+        const cache = makeCache({})
+
+        await applyFolderTags(
+            host,
+            file,
+            cache,
+            { 'Games': ['game'], 'Games/RPG': ['rpg'] },
+            { 'Games': true, 'Games/RPG': true }
+        )
+
+        expect(frontmatterWrites).toEqual([{ tags: ['game', 'rpg'] }])
+    })
 })
 
 /** A folder tree spec: markdown files directly in it, and named subfolders. */
@@ -202,6 +266,7 @@ interface TreeSpec {
 const buildTree = (path: string, spec: TreeSpec, parent: TFolder | null = null): TFolder => {
     const folder = new TFolder()
     folder.path = path
+    folder.name = path.split('/').pop() ?? path
     folder.parent = parent
 
     const children: TAbstractFile[] = []
@@ -209,6 +274,7 @@ const buildTree = (path: string, spec: TreeSpec, parent: TFolder | null = null):
         const file = new TFile()
         file.path = `${path}/${name}`
         file.extension = name.includes('.') ? (name.split('.').pop() ?? '') : ''
+        file.basename = name.replace(/\.[^/.]+$/, '')
         file.parent = folder
         children.push(file)
     }
@@ -322,5 +388,28 @@ describe('applyRuleToExistingNotes', () => {
         await applyRuleToExistingNotes(host, folder, { Projects: ['work'] })
 
         expect(processFrontMatter).toHaveBeenCalledTimes(1)
+    })
+
+    test('retroactively skips existing folder notes when ignoreFolderNotes is enabled', async () => {
+        const { host, writesByPath } = makeRetagHost()
+        const folder = buildTree('Games', { files: ['Games.md', 'diablo.md'] })
+
+        await applyRuleToExistingNotes(host, folder, { Games: ['game'] }, { Games: true })
+
+        expect(writesByPath).toEqual({
+            'Games/diablo.md': { tags: ['game'] }
+        })
+    })
+
+    test('retroactively tags existing folder notes when ignoreFolderNotes is disabled', async () => {
+        const { host, writesByPath } = makeRetagHost()
+        const folder = buildTree('Games', { files: ['Games.md', 'diablo.md'] })
+
+        await applyRuleToExistingNotes(host, folder, { Games: ['game'] }, { Games: false })
+
+        expect(writesByPath).toEqual({
+            'Games/Games.md': { tags: ['game'] },
+            'Games/diablo.md': { tags: ['game'] }
+        })
     })
 })

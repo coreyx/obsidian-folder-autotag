@@ -11,6 +11,8 @@ tagged for you.
   moment it arrives, no manual tagging required.
 - **Subfolders inherit rules** — a folder's tags apply to every note in its subfolders too, at any
   depth, combined with a subfolder's own rule if it has one.
+- **Ignore folder notes** — optionally exclude notes matching the folder name (e.g. `Games.md` in
+  `Games/`) from receiving that folder's automatic tags.
 - **Retroactive on save** — saving a folder's rule immediately tags existing notes already in that
   folder (and its subfolders), not just ones added afterward.
 - **Never destructive** — only adds tags, never removes one, and never duplicates a tag a note

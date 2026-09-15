@@ -14,7 +14,9 @@ frontmatter automatically.
 1. Right-click a folder in the file explorer.
 2. Select **Set Auto-Tag**.
 3. Enter one or more tags, separated by commas or newlines (for example: `work, urgent`).
-4. Select **Save**.
+4. Optionally toggle **Ignore folder notes** if you keep a folder overview note with the same name
+   as the folder (e.g. `Games/Games.md`) and do not want it tagged.
+5. Select **Save**.
 
 The dialog's title names the folder you're configuring, so there's no ambiguity about which one
 you're editing. Reopening it for a folder that already has a rule pre-fills the tags you configured
@@ -29,8 +31,11 @@ Once a folder has a rule:
 - **New notes** created in that folder are tagged the moment they're created.
 - **Notes moved or dragged in** from elsewhere are tagged too — it doesn't matter how a note ends
   up in the folder.
-- **Existing notes** already in the folder are tagged immediately when you save the rule, so you
-  never have to go back and manually tag notes that predate it.
+- **Folder notes can be excluded.** If **Ignore folder notes** is enabled, notes directly in that
+  folder whose file name matches the folder name will skip that folder's configured automatic tags,
+  while all other notes in the folder receive them.
+- **Existing notes** already in the folder are tagged immediately when you save the rule (skipping
+  folder notes if the setting is on), so you never have to go back and manually tag notes that predate it.
 - **Subfolders inherit the rule.** A note in a subfolder receives its own folder's tags _and_ every
   ancestor folder's tags, combined. For example, if `Projects` is tagged `work` and
   `Projects/Alpha` is tagged `alpha`, a note in `Projects/Alpha` gets both `work` and `alpha`.

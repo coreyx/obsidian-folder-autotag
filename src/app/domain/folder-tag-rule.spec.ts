@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { normalizeTags, parseTagInput } from './folder-tag-rule'
+import { isFolderNote, normalizeTags, parseTagInput } from './folder-tag-rule'
 
 describe('normalizeTags', () => {
     test('strips a leading #', () => {
@@ -30,5 +30,49 @@ describe('parseTagInput', () => {
             'personal',
             'urgent'
         ])
+    })
+})
+
+describe('isFolderNote', () => {
+    test('returns true when note is directly in folder and basename matches folder name', () => {
+        expect(
+            isFolderNote(
+                { basename: 'Games', parent: { path: 'Games' } },
+                { name: 'Games', path: 'Games' }
+            )
+        ).toBe(true)
+    })
+
+    test('returns false when note is directly in folder but basename does not match', () => {
+        expect(
+            isFolderNote(
+                { basename: 'diablo', parent: { path: 'Games' } },
+                { name: 'Games', path: 'Games' }
+            )
+        ).toBe(false)
+    })
+
+    test('returns false when note is in a subfolder even if basename matches an ancestor folder', () => {
+        expect(
+            isFolderNote(
+                { basename: 'Games', parent: { path: 'Games/RPG' } },
+                { name: 'Games', path: 'Games' }
+            )
+        ).toBe(false)
+    })
+
+    test('returns false when note has no parent', () => {
+        expect(
+            isFolderNote({ basename: 'Games', parent: null }, { name: 'Games', path: 'Games' })
+        ).toBe(false)
+    })
+
+    test('returns false when casing differs', () => {
+        expect(
+            isFolderNote(
+                { basename: 'games', parent: { path: 'Games' } },
+                { name: 'Games', path: 'Games' }
+            )
+        ).toBe(false)
     })
 })

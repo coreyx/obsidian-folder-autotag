@@ -103,4 +103,66 @@ describe('FolderTagRulesService', () => {
 
         expect(host.updateCalls).toBe(0)
     })
+
+    test('getIgnoreFolderNotes returns false by default', () => {
+        const host = createFakeHost()
+        const service = new FolderTagRulesService(host)
+
+        expect(service.getIgnoreFolderNotes('Projects/Work')).toBe(false)
+    })
+
+    test('setRule saves ignoreFolderNotes flag', async () => {
+        const host = createFakeHost()
+        const service = new FolderTagRulesService(host)
+
+        await service.setRule('Projects/Work', ['work'], true)
+
+        expect(service.getIgnoreFolderNotes('Projects/Work')).toBe(true)
+        expect(service.getRule('Projects/Work')).toEqual(['work'])
+    })
+
+    test('setting an empty tag list removes ignoreFolderNotes as well', async () => {
+        const host = createFakeHost()
+        const service = new FolderTagRulesService(host)
+        await service.setRule('Projects/Work', ['work'], true)
+
+        await service.setRule('Projects/Work', [])
+
+        expect(service.getIgnoreFolderNotes('Projects/Work')).toBe(false)
+        expect(service.getRule('Projects/Work')).toBeUndefined()
+    })
+
+    test('removeRule removes both tags and ignoreFolderNotes', async () => {
+        const host = createFakeHost()
+        const service = new FolderTagRulesService(host)
+        await service.setRule('Projects/Work', ['work'], true)
+
+        await service.removeRule('Projects/Work')
+
+        expect(service.getIgnoreFolderNotes('Projects/Work')).toBe(false)
+        expect(service.getRule('Projects/Work')).toBeUndefined()
+    })
+
+    test('rename moves ignoreFolderNotes along with tags', async () => {
+        const host = createFakeHost()
+        const service = new FolderTagRulesService(host)
+        await service.setRule('Projects/Work', ['work'], true)
+
+        await service.handleFolderRenamed('Projects/Work', 'Areas/Work')
+
+        expect(service.getIgnoreFolderNotes('Projects/Work')).toBe(false)
+        expect(service.getIgnoreFolderNotes('Areas/Work')).toBe(true)
+        expect(service.getRule('Areas/Work')).toEqual(['work'])
+    })
+
+    test('delete removes ignoreFolderNotes along with tags', async () => {
+        const host = createFakeHost()
+        const service = new FolderTagRulesService(host)
+        await service.setRule('Projects/Work', ['work'], true)
+
+        await service.handleFolderDeleted('Projects/Work')
+
+        expect(service.getIgnoreFolderNotes('Projects/Work')).toBe(false)
+        expect(service.getRule('Projects/Work')).toBeUndefined()
+    })
 })
