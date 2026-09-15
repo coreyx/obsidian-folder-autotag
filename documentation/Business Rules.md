@@ -48,3 +48,11 @@ When a new business rule is mentioned:
   rule doesn't apply to Folder B's notes" — only holds between folders that aren't in an
   ancestor/descendant relationship; Req 5.4, 5.5.) A sibling or otherwise unrelated folder's rule
   still never applies — only ancestors in the note's own folder chain do.
+- **Ignore folder notes.** When a folder's automatic-tagging rule has "Ignore folder notes" enabled
+  (true), the plugin does not apply that folder's configured automatic tags to any note whose name
+  (excluding extension) matches the folder's name (e.g. `Games.md` inside `Games`). Other notes in
+  the folder receive tags normally. The setting is configured per folder via a checkbox in the
+  folder auto-tag modal, defaults to disabled (false), follows the folder across renames, is removed
+  on folder deletion or rule removal, and is respected during both active tagging (creation/move)
+  and retroactive tagging on save.
+
